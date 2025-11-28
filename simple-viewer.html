@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>간단한 GitHub 파일 뷰어 (보안 주의)</title>
+</head>
+<body>
+    <h1>GitHub 비공개 파일 내용 (보안에 유의하세요)</h1>
+    <pre id="file-content">불러오는 중...</pre>
+
+    <script>
+        // !!! 경고: 이 방식은 개인 액세스 토큰이 외부에 노출됩니다. 절대 공개적인 환경에서 사용하지 마세요. !!!
+        const GITHUB_TOKEN = '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';
+        const REPO_OWNER = 'sunnygraphy';
+        const REPO_NAME = 'for_reading_novles';
+        //const FILE_PATH = 'for_reading_novles/my-k267.txt';
+        const FILE_PATH = 'my-k267.txt';
+
+        const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/${FILE_PATH}`;
+
+        fetch(apiUrl, {
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json' // JSON 형식으로 메타데이터 받기
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`GitHub API 오류: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // GitHub API는 파일 내용을 Base64로 인코딩하여 전달합니다.
+            // atob() 함수를 사용해 디코딩해야 합니다.
+            const decodedContent = atob(data.content);
+            document.getElementById('file-content').textContent = decodedContent;
+        })
+        .catch(error => {
+            console.error('오류:', error);
+            document.getElementById('file-content').textContent = '파일을 불러오는 데 실패했습니다. 콘솔을 확인하세요.';
+        });
+    </script>
+</body>
+</html>
